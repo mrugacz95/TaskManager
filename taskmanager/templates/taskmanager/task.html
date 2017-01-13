@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task</title>
+</head>
+<body>
+
+<h1>{{ task.title }}</h1>
+<p> {{ task.description }}</p>
+<p>label: <strong>{{ task.label }}</strong></p>
+<p>deadline: <strong>{{ task.deadline }}</strong></p>
+<a href="{% url 'taskmanager:tasks' %}">All tasks</a>
+</body>
+</html>
