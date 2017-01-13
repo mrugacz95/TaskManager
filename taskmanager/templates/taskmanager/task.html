@@ -1,7 +1,19 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
-<p> {{ task.description }}</p>
-<p>label: <strong>{{ task.label }}</strong></p>
-<div class="date">deadline: <strong>{{ task.deadline }}</strong></div>
-<a href="{% url 'taskmanager:tasks' %}">All tasks</a>
-{%  endblock content %}
+
+    <a href={% url 'taskmanager:deletetask' task.id %}>
+        <button type="button" class="btn btn-warning save">Delete</button>
+    </a>
+
+    <h2> {{ task.title }}</h2>
+    <ul>
+        <li>description: <strong>{{ task.description }}</strong></li>
+        <li>label: <strong>{{ task.label }}</strong></li>
+        <li>deadline: <strong>{{ task.deadline }}</strong></li>
+    </ul>
+    <div>
+        <a href={% url 'taskmanager:tasks' %}>
+            <button type="button" class="btn btn-primary">Back</button>
+        </a>
+    </div>
+{% endblock content %}

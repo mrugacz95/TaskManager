@@ -73,7 +73,7 @@ class UserGroup(models.Model):
 
 class UserTask(models.Model):
     user_name = models.ForeignKey(User, models.DO_NOTHING, db_column='user_name')
-    task = models.ForeignKey(Task, models.DO_NOTHING, db_column='task_id')
+    task = models.ForeignKey(Task, db_column='task_id', on_delete=models.CASCADE)
 
     class Meta:
         managed = False

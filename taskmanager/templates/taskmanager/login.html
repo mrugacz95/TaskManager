@@ -3,7 +3,7 @@
 {% crispy login_form login_form.helper %}
 {% block content %}
     {% if problem %}
-        <strong style="color: red">Authorization failed!</strong>
+        <p class="error">Authorization failed!</p>
     {% endif %}
     {% crispy form %}
 {% endblock content %}

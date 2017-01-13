@@ -2,10 +2,11 @@ import datetime
 
 import binascii
 import os
-
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.urls import reverse
 
+from taskmanager import views
+from taskmanager.forms import LoginForm
 from taskmanager.models import Token, User
 
 TOKEN = 'TOKEN_COOKIE'
@@ -16,11 +17,11 @@ def authentication(func):
         request = args[0]
         token = request.COOKIES.get(TOKEN)
         try:
-            tokenObject = Token.objects.get(access_token=token)
-            print('authoricated with ' + tokenObject.access_token)
+            Token.objects.get(access_token=token)
             return func(*args, **kw)
         except Token.DoesNotExist:
-            return HttpResponseRedirect('login')
+            print('tutaj')
+            return HttpResponseRedirect(reverse('taskmanager:login'))
 
     return wrapper
 
@@ -35,10 +36,8 @@ def createToken():
 
 def getCurrentUser(request):
     token = request.COOKIES.get(TOKEN)
-    print(token)
     try:
         user = User.objects.get(token_token__access_token=token)
         return user
     except User.DoesNotExist:
-        print('nope')
         return None

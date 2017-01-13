@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'taskmanager.apps.TaskManagerConfig',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'django.core.urlresolvers',
 ]
 MIDDLEWARE_CLASSES = [
     'django.middleware.csrf.CsrfViewMiddleware',
