@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+
 class GroupNames(models.Model):
     name = models.CharField(max_length=32, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
@@ -37,10 +38,11 @@ class Task(models.Model):
         managed = False
         db_table = 'task'
 
+
 class Token(models.Model):
     access_token = models.CharField(max_length=32, blank=True, null=True)
     expiration_date = models.DateTimeField(blank=True, null=True)
-    token_id = models.FloatField(db_column='token_ID', primary_key=True)  # Field name made lowercase.
+    token_id = models.AutoField(db_column='token_ID', primary_key=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -53,6 +55,7 @@ class User(models.Model):
     email = models.CharField(max_length=32, blank=True, null=True)
     role_role_name = models.ForeignKey(Role, models.DO_NOTHING, db_column='role_role_name')
     token_token = models.ForeignKey(Token, models.DO_NOTHING, db_column='token_token_ID')  # Field name made lowercase.
+
     class Meta:
         managed = False
         db_table = 'user'

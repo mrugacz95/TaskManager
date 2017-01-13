@@ -28,15 +28,17 @@ def authentication(func):
 def createToken():
     randomToken = binascii.hexlify(os.urandom(32))
     expirationDate = datetime.datetime.now() + datetime.timedelta(days=7)
-    newToken = Token.objects.create(access_token=randomToken, expiration_date=expirationDate)
+    newToken = Token(access_token=randomToken, expiration_date=expirationDate)
+    newToken.save()
     return newToken
 
 
 def getCurrentUser(request):
     token = request.COOKIES.get(TOKEN)
-    users = User.objects.all()
+    print(token)
     try:
-        user = users.get(token_token__access_token=token)
+        user = User.objects.get(token_token__access_token=token)
         return user
     except User.DoesNotExist:
+        print('nope')
         return None

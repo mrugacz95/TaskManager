@@ -11,5 +11,7 @@
     <li><a href={% url 'taskmanager:task' task.id %}>{{ task.title }}</a></li>
 {% endfor %}
 </ul>
+
+<a href={% url 'taskmanager:logout' %}>Logout</a>
 </body>
 </html>
