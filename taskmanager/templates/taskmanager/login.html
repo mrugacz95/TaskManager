@@ -1,3 +1,7 @@
+{% if problem %}
+    <strong style="color: red">Authorization failed!</strong>
+{% endif %}
+
 <form action="/login" method="post">
     {% csrf_token %}
     <label for="login">Your login: </label>

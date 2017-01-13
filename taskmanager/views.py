@@ -1,18 +1,14 @@
-import os
+import datetime
+import hashlib
 
-import binascii
 from django.conf import settings
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
-from rest_framework import status
-from rest_framework.response import Response
-import hashlib
-import datetime
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
+from taskmanager.auth import TOKEN, createToken, getCurrentUser
 from taskmanager.forms import LoginForm
-from taskmanager.models import User, Role, Task, Token, UserTask
-
-TOKEN = 'TOKEN_COOKIE'
+from taskmanager.models import User, Task, Token
 
 
 def index(request):
@@ -36,26 +32,9 @@ def task(request, task_id):
     return render(request, 'taskmanager/task.html', {'task': task})
 
 
-def authentication(func):
-    def wrapper(*args, **kw):
-        request = args[0]
-        token = request.COOKIES.get(TOKEN)
-        print('trying with ' + token)
-        tokens = Token.objects.all()
-        for tok in tokens:
-            print(tok.access_token)
-        try:
-            tokenObject = Token.objects.get(access_token=token)
-            print('authoricated with ' + tokenObject.access_token)
-            return func(*args, **kw)
-        except Token.DoesNotExist:
-            return no_auth(request)
 
-    return wrapper
-
-
-@authentication
 def tasks(request):
+    user = getCurrentUser(request)
     tasks = Task.objects.all()
     return render(request, 'taskmanager/tasks.html', {'tasks': tasks})
 
@@ -66,25 +45,25 @@ def login(request):
         if form.is_valid():
             formLogin = form.cleaned_data['login']
             formPassword = form.cleaned_data['password']
-            formUser = User.objects.get(pk=formLogin)
-            m = hashlib.md5()
-            m.update(formPassword.encode('utf-8'))
-            hashedPassword = m.hexdigest()
-            randomToken = binascii.hexlify(os.urandom(32))
-            expirationDate = datetime.datetime.now() + datetime.timedelta(days=7)
             try:
-                tokenObject = Token.objects.create(access_token=randomToken, expiration_date=expirationDate)
+                formUser = User.objects.get(pk=formLogin)
+                m = hashlib.md5()
+                m.update(formPassword.encode('utf-8'))
+                hashedPassword = m.hexdigest()
+                token = request.COOKIES.get(TOKEN)
+                try:
+                    tokenObject = Token.objects.get(access_token=token)
+                    if tokenObject.expiration_date < timezone.now():
+                        tokenObject = createToken()
+                except Token.DoesNotExist:
+                    tokenObject = createToken()
                 if formUser.password == hashedPassword:
-                    res = HttpResponseRedirect('tasks')
-                    set_cookie(res, TOKEN, randomToken)
+                    res = HttpResponseRedirect('tasks/')
+                    set_cookie(res, TOKEN, tokenObject.access_token)
                     return res
-            except Token.DoesNotExist:
+            except User.DoesNotExist:
                 pass
-    return render(request, 'taskmanager/login.html', {})
-
-
-def no_auth(request):
-    return HttpResponse("brak autoryzacji", status=status.HTTP_403_FORBIDDEN)
+    return render(request, 'taskmanager/login.html', {'problem':    True})
 
 
 def set_cookie(response, key, value, days_expire=7):
