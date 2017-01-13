@@ -20,7 +20,7 @@ def authentication(func):
             print('authoricated with ' + tokenObject.access_token)
             return func(*args, **kw)
         except Token.DoesNotExist:
-            return render(request, 'taskmanager/login.html', {'problem': True})
+            return HttpResponseRedirect('login')
 
     return wrapper
 

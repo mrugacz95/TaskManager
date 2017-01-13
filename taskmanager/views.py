@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication
-from taskmanager.forms import LoginForm
+from taskmanager.forms import LoginForm, AddTaskForm
 from taskmanager.models import User, Task, Token
 
 
@@ -26,10 +26,15 @@ def user(request, user_name):
     user.tasks = tasks
     return render(request, 'taskmanager/user.html', {'user': user})
 
-
+@authentication
 def task(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
-    return render(request, 'taskmanager/task.html', {'task': task})
+    user = getCurrentUser(request)
+    try:
+        task = get_object_or_404(Task.objects.filter(id=task_id, usertask__user_name__name=user.name))
+        return render(request, 'taskmanager/task.html', {'task': task})
+    except Task.DoesNotExist:
+        return HttpResponse(status=404)
+
 
 
 @authentication
@@ -38,12 +43,13 @@ def tasks(request):
     print(user.name)
     try:
         tasks = Task.objects.filter(usertask__user_name=user.name)
-        return render(request, 'taskmanager/tasks.html', {'tasks': tasks})
+        return render(request, 'taskmanager/tasks.html', {'tasks': tasks, 'user':user})
     except Task.DoesNotExist:
         return render(request, 'taskmanager/tasks.html')
 
 
 def login(request):
+    responde = render(request, 'taskmanager/login.html', {'problem': False, 'form': LoginForm()})
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -68,12 +74,14 @@ def login(request):
                             tokenObject = createToken()
                     formUser.token_token_id = tokenObject.pk
                     formUser.save()
-                    res = HttpResponseRedirect('tasks/')
-                    set_cookie(res, TOKEN, tokenObject.access_token)
-                    return res
+                    response = HttpResponseRedirect('tasks/')
+                    set_cookie(response, TOKEN, tokenObject.access_token)
+                    return response
             except User.DoesNotExist:
-                pass
-    return render(request, 'taskmanager/login.html', {'problem': True})
+                responde = render(request, 'taskmanager/login.html', {'problem': True, 'form': LoginForm()})
+    responde.delete_cookie(TOKEN)
+    return responde
+
 
 
 def set_cookie(response, key, value, days_expire=7):
@@ -88,6 +96,9 @@ def set_cookie(response, key, value, days_expire=7):
 
 
 def logout(request):
-    res = render(request, 'taskmanager/login.html', {'problem': False})
+    res = HttpResponseRedirect('login')
     res.delete_cookie(TOKEN)
     return res
+
+def addTask(request):
+    return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm()} )

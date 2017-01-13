@@ -1,15 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Task</title>
-</head>
-<body>
-
-<h1>{{ task.title }}</h1>
+{% extends 'taskmanager/base.html' %}
+{% block content %}
 <p> {{ task.description }}</p>
 <p>label: <strong>{{ task.label }}</strong></p>
-<p>deadline: <strong>{{ task.deadline }}</strong></p>
+<div class="date">deadline: <strong>{{ task.deadline }}</strong></div>
 <a href="{% url 'taskmanager:tasks' %}">All tasks</a>
-</body>
-</html>
+{%  endblock content %}

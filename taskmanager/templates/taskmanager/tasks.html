@@ -1,17 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tasks</title>
-</head>
-<body>
-<h1>Tasks:</h1>
-<ul>
-{% for task in tasks %}
-    <li><a href={% url 'taskmanager:task' task.id %}>{{ task.title }}</a></li>
-{% endfor %}
-</ul>
+{% extends 'taskmanager/base.html' %}
 
-<a href={% url 'taskmanager:logout' %}>Logout</a>
-</body>
-</html>
+{% block content %}
+<h1>Tasks:</h1>
+{% if tasks|length == 0 %}
+    <p>No tasks for you!</p>
+{% else %}
+    {% for task in tasks %}
+        <div class="post"><a href={% url 'taskmanager:task' task.id %}>{{ task.title }}</a></div>
+    {% endfor %}
+{% endif %}
+
+<a href={% url 'taskmanager:logout' %}>Logout({{ user.name }})</a>
+{% endblock content %}

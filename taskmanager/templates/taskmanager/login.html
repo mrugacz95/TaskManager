@@ -1,12 +1,9 @@
-{% if problem %}
-    <strong style="color: red">Authorization failed!</strong>
-{% endif %}
-
-<form action="/login" method="post">
-    {% csrf_token %}
-    <label for="login">Your login: </label>
-    <input id="login" type="text" name="login" value="{{ login }}">
-    <label for="password">Your login: </label>
-    <input id="password" type="password" name="password" value="{{ pass }}">
-    <input type="submit" value="OK">
-</form>
+{% extends 'taskmanager/base.html' %}
+{% load crispy_forms_tags %}
+{% crispy login_form login_form.helper %}
+{% block content %}
+    {% if problem %}
+        <strong style="color: red">Authorization failed!</strong>
+    {% endif %}
+    {% crispy form %}
+{% endblock content %}

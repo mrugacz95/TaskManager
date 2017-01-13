@@ -1,0 +1,7 @@
+{% extends 'taskmanager/base.html' %}
+
+{% load crispy_forms_tags %}
+{% crispy addtask_form addtask_form.helper %}
+{% block content %}
+    {% crispy form %}
+{% endblock content %}

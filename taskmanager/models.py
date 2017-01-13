@@ -30,7 +30,7 @@ class Role(models.Model):
 class Task(models.Model):
     title = models.CharField(max_length=32, blank=True, null=True)
     description = models.CharField(max_length=160, blank=True, null=True)
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     deadline = models.DateTimeField(blank=True, null=True)
     label = models.CharField(max_length=32, blank=True, null=True)
 
