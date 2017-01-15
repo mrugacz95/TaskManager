@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication
-from taskmanager.forms import LoginForm, AddTaskForm
+from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm
 from taskmanager.models import User, Task, Token, UserTask
 
 
@@ -38,14 +38,14 @@ def task(request, task_id):
 def tasks(request):
     user = getCurrentUser(request)
     try:
-        tasks = Task.objects.filter(usertask__user_name=user.name)
-        return render(request, 'taskmanager/tasks.html', {'tasks': tasks, 'user': user})
+        tasksList = Task.objects.filter(usertask__user_name=user.name).order_by('deadline')
+        return render(request, 'taskmanager/tasks.html', {'tasks': tasksList, 'user': user})
     except Task.DoesNotExist:
         return render(request, 'taskmanager/tasks.html')
 
 
 def login(request):
-    response = render(request, 'taskmanager/login.html', {'problem': False, 'form': LoginForm()})
+    problem = False
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -72,8 +72,11 @@ def login(request):
                     response = HttpResponseRedirect(reverse('taskmanager:tasks'))
                     set_cookie(response, TOKEN, tokenObject.access_token)
                     return response
+                else:
+                    problem = True
             except User.DoesNotExist:
-                response = render(request, 'taskmanager/login.html', {'problem': True, 'form': LoginForm()})
+                problem = True
+    response = render(request, 'taskmanager/login.html', {'problem': problem, 'loginForm': LoginForm(), 'registerForm': RegisterForm()})
     response.delete_cookie(TOKEN)
     return response
 

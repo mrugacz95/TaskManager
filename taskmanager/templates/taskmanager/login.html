@@ -2,8 +2,11 @@
 {% load crispy_forms_tags %}
 {% crispy login_form login_form.helper %}
 {% block content %}
+    <h1 style="text-align: center">Sign in</h1>
     {% if problem %}
-        <p class="error">Authorization failed!</p>
+        <div class="alert alert-warning">Authorization failed!</div>
     {% endif %}
-    {% crispy form %}
+    {% crispy loginForm %}
+    <h1 style="text-align: center">or register </h1>
+    {% crispy registerForm %}
 {% endblock content %}

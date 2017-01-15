@@ -16,14 +16,26 @@ class LoginForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('submit', 'Submit'))
+        self.helper.add_input(Submit('login', 'Sign In'))
+
+
+class RegisterForm(forms.Form):
+    login = forms.CharField(label='Login', max_length=100)
+    password = forms.CharField(label='Password', max_length=100, widget=PasswordInput())
+    repeatPassword = forms.CharField(label='Repeat password', max_length=100, widget=PasswordInput(), required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('register', 'Register'))
+        self.helper.field_class = 'text-input'
 
 
 class AddTaskForm(forms.Form):
-    title = forms.CharField(label='title', max_length=100)
-    description = forms.CharField(label='description', max_length=200)
-    deadline = forms.DateField(label='deadline', initial=datetime.date.today)
-    label = forms.CharField(label='label', max_length=100)
+    title = forms.CharField(label='Title', max_length=100)
+    description = forms.CharField(label='Description', max_length=200)
+    deadline = forms.DateField(label='Deadline', initial=datetime.date.today)
+    label = forms.CharField(label='Label', max_length=100)
 
     def __init__(self, *args, **kwargs):
         super(AddTaskForm, self).__init__(*args, **kwargs)
