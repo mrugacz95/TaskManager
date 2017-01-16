@@ -3,9 +3,16 @@
     <a href="{% url 'taskmanager:login' %}">
         <button type="submit" class="btn btn-danger save">Withdraw</button>
     </a>
-<h1>{{ group.name }}</h1>
+<h1>Group: {{ group.name }}</h1>
+
+    <h1>Users:</h1>
+    <ul>
+        {% for user in users %}
+            <li><a href={% url 'taskmanager:user' user.name %}>{{ user.name }}</a></li>
+        {% endfor %}
+    </ul>
     <div>
-        <a href={% url 'taskmanager:tasks' %}>
+        <a onclick="goBack()">
             <button type="button" class="btn btn-primary">Back</button>
         </a>
     </div>

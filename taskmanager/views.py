@@ -1,4 +1,5 @@
 from django.db import IntegrityError
+from django.db import InternalError
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -15,13 +16,6 @@ def users(request):
     return render(request, 'taskmanager/users.html', {'users': users})
 
 
-def user(request, user_name):
-    user = get_object_or_404(User, pk=user_name)
-    tasks = Task.objects.select_related(user_name)
-    user.tasks = tasks
-    return render(request, 'taskmanager/user.html', {'user': user})
-
-
 @authentication
 def task(request, task_id):
     user = getCurrentUser(request)
@@ -33,16 +27,16 @@ def task(request, task_id):
 
 
 @authentication
-def tasks(request):
+def user(request, user_name):
     user = getCurrentUser(request)
     try:
-        query = 'SELECT task.title, task.id,task.deadline,task.label,task.description FROM task LEFT JOIN group_task on task.id = group_task.task_id LEFT JOIN group_names on group_task.group_id = group_names.id LEFT JOIN user_group on group_names.id = user_group.group_names_id left join user_task on user_task.task_id = task.id WHERE user_group.user_name = "' + user.name + '" or user_task.user_name = "' + user.name + '"'
+        query = 'SELECT task.title, task.id,task.deadline,task.label,task.description FROM task LEFT JOIN group_task on task.id = group_task.task_id LEFT JOIN group_names on group_task.group_id = group_names.id LEFT JOIN user_group on group_names.id = user_group.group_names_id left join user_task on user_task.task_id = task.id WHERE user_group.user_name = "' + user_name + '" or user_task.user_name = "' + user_name + '"'
         tasksList = list(Task.objects.raw(raw_query=query))
-        groupList = GroupNames.objects.filter(usergroup__user_name=user.name)
-        return render(request, 'taskmanager/tasks.html',
+        groupList = GroupNames.objects.filter(usergroup__user_name=user_name)
+        return render(request, 'taskmanager/user.html',
                       {'tasks': tasksList, 'user': user, 'groups': groupList, 'error': False})
     except Task.DoesNotExist:
-        return render(request, 'taskmanager/tasks.html', {'error': True})
+        return render(request, 'taskmanager/user.html', {'error': True})
 
 
 def login(request):
@@ -68,7 +62,8 @@ def login(request):
                             tokenObject = createToken()
                     formUser.token_token_id = tokenObject.pk
                     formUser.save()
-                    response = HttpResponseRedirect(reverse('taskmanager:tasks'))
+                    print(formUser.name)
+                    response = HttpResponseRedirect(reverse('taskmanager:user', kwargs={'user_name':formUser.name}))
                     set_cookie(response, TOKEN, tokenObject.access_token)
                     return response
                 else:
@@ -76,7 +71,7 @@ def login(request):
             except User.DoesNotExist:
                 problem = 'Wrong login or password'
     response = render(request, 'taskmanager/login.html',
-                      {'problem': problem, 'loginForm': LoginForm(), 'registerForm': RegisterForm()})
+                      {'problem': problem, 'loginForm': LoginForm()})
     response.delete_cookie(TOKEN)
     return response
 
@@ -108,9 +103,10 @@ def addTask(request):
 
 @authentication
 def deleteTask(request, task_id):
+    user = getCurrentUser()
     try:
         Task.objects.get(id=task_id).delete()
-        return HttpResponseRedirect(reverse('taskmanager:tasks'))
+        return HttpResponseRedirect(reverse('taskmanager:user', {'user_name': user.name}))
     except Task.DoesNotExist:
         return render(request, 'taskmanager/task.html', {'task_id': task_id, })
 
@@ -132,6 +128,8 @@ def register(request):
                     newUser.save(force_insert=True)
                 except IntegrityError:
                     problem = 'User with this login already exists'
+                except InternalError:
+                    problem = 'Login cant use polish diacritic signs'
             else:
                 problem = 'Passwords are not equal'
         else:
@@ -142,13 +140,15 @@ def register(request):
 @authentication
 def group(request, group_id):
     groupObj = GroupNames.objects.get(id=group_id)
-    return render(request, 'taskmanager/group.html', {'group': groupObj})
+    groupUsers = User.objects.filter(usergroup__group_names_id=group_id)
+    return render(request, 'taskmanager/group.html', {'group': groupObj, 'users':groupUsers})
 
 
 @authentication
 def addgroup(request):
     user = getCurrentUser(request)
     problem = None
+    message = None
     if request.method == 'POST':
         form = AddGroupForm(request.POST)
         if form.is_valid():
@@ -156,6 +156,7 @@ def addgroup(request):
             group = GroupNames(name=groupName)
             group.save()
             UserGroup.objects.create(group_names_id=group.pk, user_name=user)
+            message = "Success"
         else:
             problem = form.errors
-    return render(request, 'taskmanager/addgroup.html', {'form': AddGroupForm()})
+    return render(request, 'taskmanager/addgroup.html', {'form': AddGroupForm(), 'problem': problem})

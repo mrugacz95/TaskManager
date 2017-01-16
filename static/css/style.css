@@ -47,12 +47,6 @@ h1, h2, h4 {
 .post h1 a, .post h1 a:visited {
     color: #000000;
 }
-.error {
-    color: red;
-    font-weight: bold;
-}
-p {
-    overflow: hidden;
-    text-align: center;
-    color: red;
+body {
+    padding-bottom: 40px;
 }
