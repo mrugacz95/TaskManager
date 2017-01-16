@@ -2,11 +2,12 @@
 {% load crispy_forms_tags %}
 {% crispy login_form login_form.helper %}
 {% block content %}
+    <a href="{% url 'taskmanager:register' %}">
+    <button type="button" class="btn btn-warning save">Sign up</button>
+    </a>
     <h1 style="text-align: center">Sign in</h1>
     {% if problem %}
         <div class="alert alert-warning">Authorization failed!</div>
     {% endif %}
     {% crispy loginForm %}
-    <h1 style="text-align: center">or register </h1>
-    {% crispy registerForm %}
 {% endblock content %}

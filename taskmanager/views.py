@@ -1,15 +1,18 @@
 import datetime
-import hashlib
 
 from django.conf import settings
+from django.db import DatabaseError
+from django.db import IntegrityError
+from django.db.models import Q
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication
+
+from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword
 from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm
-from taskmanager.models import User, Task, Token, UserTask
+from taskmanager.models import User, Task, Token, UserTask, GroupNames
 
 
 def users(request):
@@ -38,14 +41,20 @@ def task(request, task_id):
 def tasks(request):
     user = getCurrentUser(request)
     try:
-        tasksList = Task.objects.filter(usertask__user_name=user.name).order_by('deadline')
-        return render(request, 'taskmanager/tasks.html', {'tasks': tasksList, 'user': user})
+        tasksList = Task.objects.filter(Q(usertask__user_name=user.name)).order_by('deadline')
+        #groupName = GroupNames.objects.filter(usergroup__user_name=user.name).first()
+        #print(groupName.name)
+        #tasksList = Task.objects.filter(grouptask__group__usergroup=groupName.name)
+        query = 'SELECT task.title, task.id,task.deadline,task.label,task.description FROM task LEFT JOIN group_task on task.id = group_task.task_id LEFT JOIN group_names on group_task.group_id = group_names.id LEFT JOIN user_group on group_names.id = user_group.group_names_id left join user_task on user_task.task_id = task.id WHERE user_group.user_name = "'+user.name+'" or user_task.user_name = "'+user.name+'"'
+        tasksList = list(Task.objects.raw(raw_query=query))
+        groupList = GroupNames.objects.filter(usergroup__user_name=user.name)
+        return render(request, 'taskmanager/tasks.html', {'tasks': tasksList, 'user': user, 'groups':groupList, 'error': False})
     except Task.DoesNotExist:
-        return render(request, 'taskmanager/tasks.html')
+        return render(request, 'taskmanager/tasks.html', {'error': True})
 
 
 def login(request):
-    problem = False
+    problem = None
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -53,9 +62,7 @@ def login(request):
             formPassword = form.cleaned_data['password']
             try:
                 formUser = User.objects.get(pk=formLogin)
-                m = hashlib.md5()
-                m.update(formPassword.encode('utf-8'))
-                hashedPassword = m.hexdigest()
+                hashedPassword = hashPassword(formPassword)
                 if formUser.password == hashedPassword:
                     token = request.COOKIES.get(TOKEN)
                     if token == '':
@@ -73,10 +80,11 @@ def login(request):
                     set_cookie(response, TOKEN, tokenObject.access_token)
                     return response
                 else:
-                    problem = True
+                    problem = 'Wrong password or login'
             except User.DoesNotExist:
-                problem = True
-    response = render(request, 'taskmanager/login.html', {'problem': problem, 'loginForm': LoginForm(), 'registerForm': RegisterForm()})
+                problem = 'Wrong login or password'
+    response = render(request, 'taskmanager/login.html',
+                      {'problem': problem, 'loginForm': LoginForm(), 'registerForm': RegisterForm()})
     response.delete_cookie(TOKEN)
     return response
 
@@ -100,6 +108,7 @@ def logout(request):
 
 @authentication
 def addTask(request):
+    message = error = None
     if request.method == 'POST':
         form = AddTaskForm(request.POST)
         if form.is_valid():
@@ -111,11 +120,9 @@ def addTask(request):
             newTask.save(force_insert=True)
             user = getCurrentUser(request)
             UserTask.objects.create(user_name=user, task_id=newTask.pk)
-            return render(request, 'taskmanager/addtask.html',
-                          {'form': AddTaskForm(), 'error': '', 'message': 'Success', })
-        return render(request, 'taskmanager/addtask.html',
-                      {'form': AddTaskForm(), 'error': form.errors, 'message': ''})
-    return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm(), 'error': '', 'message': ''})
+            message = 'Success'
+        error= form.errors
+    return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm(), 'error': error, 'message': message})
 
 
 @authentication
@@ -125,3 +132,31 @@ def deleteTask(request, task_id):
         return HttpResponseRedirect(reverse('taskmanager:tasks'))
     except Task.DoesNotExist:
         return render(request, 'taskmanager/task.html', {'task_id': task_id, })
+
+
+def register(request):
+    problem = None
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            userName = form.cleaned_data['login']
+            password = form.cleaned_data['password']
+            repass = form.cleaned_data['repeatPassword']
+            email = form.cleaned_data['email']
+            if password == repass:
+                token = createToken()
+                newUser = User(name=userName, password=hashPassword(password), email=email, role_role_name_id='user', token_token_id=token.pk)
+                try:
+                    newUser.save(force_insert=True)
+                except IntegrityError:
+                    problem = 'User with this login already exists'
+            else:
+                problem = 'Passwords are not equal'
+        else:
+            problem = form.errors
+    return render(request, 'taskmanager/register.html', {'registerForm': RegisterForm(), 'problem': problem})
+
+@authentication
+def group(request, group_id):
+    GroupNames.objects.filter(id=group_id)
+    return render(request, 'taskmanager/group.html', {'group':group})

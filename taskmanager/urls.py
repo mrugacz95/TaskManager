@@ -16,4 +16,6 @@ urlpatterns = [
     url(r'^login/$', views.login, name='login'),
     url(r'^addtask', views.addTask, name='addtask'),
     url(r'^deletetask/(?P<task_id>[0-9]+)/$', views.deleteTask, name='deletetask'),
+    url(r'^register', views.register, name='register'),
+    url(r'^group/(?P<group_id>[0-9]+)/$', views.group, name='group'),
 ]

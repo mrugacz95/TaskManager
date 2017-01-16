@@ -1,0 +1,14 @@
+{% extends 'taskmanager/base.html' %}
+{% load crispy_forms_tags %}
+{% crispy login_form login_form.helper %}
+{% block content %}
+    <a href="{% url 'taskmanager:login' %}">
+        <button type="submit" class="btn btn-danger save">Cancel</button>
+    </a>
+    <h1 style="text-align: center">Sign up</h1>
+    {% if problem %}
+        <div class="alert alert-warning">{{ problem }}</div>
+    {% endif %}
+    {% crispy registerForm %}
+
+{% endblock content %}

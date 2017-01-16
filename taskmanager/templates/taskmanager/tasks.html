@@ -5,6 +5,10 @@
     <a href={% url 'taskmanager:addtask' %}>
         <button type="button" class="btn btn-default save">Add</button>
     </a>
+
+    {% if error %}
+        <div class="alert alert-warning">Something went wrong</div>
+    {% endif %}
     {% if tasks|length == 0 %}
         <p>No tasks for you!</p>
     {% else %}
@@ -14,6 +18,18 @@
             {% endfor %}
         </div>
     {% endif %}
+
+    <h1>Groups:</h1>
+    {% if groups|length == 0 %}
+        <p>You dont belong to any group</p>
+    {% else %}
+        <div class="list-group">
+            {% for group in groups %}
+                <a href="{% url 'taskmanager:group' group.id %}" class="list-group-item list-group-item-action">{{ group.name }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <a href={% url 'taskmanager:logout' %}>
         <button type="button" class="btn btn-primary">Logout({{ user.name }})</button>
     </a>

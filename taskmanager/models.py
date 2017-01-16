@@ -70,6 +70,15 @@ class UserGroup(models.Model):
         db_table = 'user_group'
         unique_together = (('user_name', 'group_names'),)
 
+class GroupTask(models.Model):
+    group_id = models.ForeignKey(GroupNames, models.DO_NOTHING, db_column='group_id')
+    task_id = models.ForeignKey(Task, db_column='task_id', on_delete=models.CASCADE)
+
+    class Meta:
+        managed = False
+        db_table = 'group_task'
+        unique_together = (('group_id', 'task_id'),)
+
 
 class UserTask(models.Model):
     user_name = models.ForeignKey(User, models.DO_NOTHING, db_column='user_name')

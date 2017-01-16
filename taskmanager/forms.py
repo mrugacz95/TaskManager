@@ -1,7 +1,8 @@
 import datetime
 from audioop import reverse
 
-from crispy_forms.layout import Submit
+from crispy_forms.bootstrap import FormActions
+from crispy_forms.layout import Submit, Button
 from django import forms
 from django.forms import PasswordInput
 from crispy_forms.helper import FormHelper
@@ -16,11 +17,12 @@ class LoginForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit('login', 'Sign In'))
+        self.helper.add_input(Submit('log in', 'Sign In'))
 
 
 class RegisterForm(forms.Form):
     login = forms.CharField(label='Login', max_length=100)
+    email = forms.EmailField(required=True)
     password = forms.CharField(label='Password', max_length=100, widget=PasswordInput())
     repeatPassword = forms.CharField(label='Repeat password', max_length=100, widget=PasswordInput(), required=True)
 
@@ -28,7 +30,6 @@ class RegisterForm(forms.Form):
         super(RegisterForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit('register', 'Register'))
-        self.helper.field_class = 'text-input'
 
 
 class AddTaskForm(forms.Form):

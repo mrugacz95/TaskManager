@@ -36,10 +36,13 @@ INSTALLED_APPS = [
     'taskmanager.apps.TaskManagerConfig',
     'django.contrib.staticfiles',
     'crispy_forms',
-    'django.core.urlresolvers',
 ]
 MIDDLEWARE_CLASSES = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -73,9 +76,6 @@ DATABASES = {
         'PORT': '3306',
     }
 }
-
-# Password validation
-# https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/

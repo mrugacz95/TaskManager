@@ -1,12 +1,11 @@
-import datetime
-
 import binascii
+import datetime
+import hashlib
 import os
+
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from taskmanager import views
-from taskmanager.forms import LoginForm
 from taskmanager.models import Token, User
 
 TOKEN = 'TOKEN_COOKIE'
@@ -20,7 +19,7 @@ def authentication(func):
             Token.objects.get(access_token=token)
             return func(*args, **kw)
         except Token.DoesNotExist:
-            print('tutaj')
+            print('Token nie istnieje')
             return HttpResponseRedirect(reverse('taskmanager:login'))
 
     return wrapper
@@ -41,3 +40,7 @@ def getCurrentUser(request):
         return user
     except User.DoesNotExist:
         return None
+def hashPassword(password):
+    m = hashlib.md5()
+    m.update(password.encode('utf-8'))
+    return m.hexdigest()
