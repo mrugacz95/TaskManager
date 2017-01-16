@@ -33,7 +33,7 @@ class Task(models.Model):
     id = models.AutoField(primary_key=True)
     deadline = models.DateTimeField(blank=True, null=True)
     label = models.CharField(max_length=32, blank=True, null=True)
-
+    done = models.BooleanField(default=False, db_column='done')
     class Meta:
         managed = False
         db_table = 'task'
@@ -69,6 +69,7 @@ class UserGroup(models.Model):
         managed = False
         db_table = 'user_group'
         unique_together = (('user_name', 'group_names'),)
+
 
 class GroupTask(models.Model):
     group_id = models.ForeignKey(GroupNames, models.DO_NOTHING, db_column='group_id')

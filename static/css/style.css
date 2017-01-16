@@ -12,10 +12,6 @@ h1 a {
     font-size: 36pt;
 }
 
-.content {
-    margin-left: 40px;
-}
-
 h1, h2, h4 {
     font-family: 'Lobster', cursive;
 }
@@ -25,7 +21,7 @@ h1, h2, h4 {
     color: #828282;
 }
 
-.save {
+.toRight {
     float: right;
 }
 
@@ -49,4 +45,26 @@ h1, h2, h4 {
 }
 body {
     padding-bottom: 40px;
+}
+.done {
+    text-decoration: line-through;
+}
+#imaginary_container{
+    margin-top:20%; /* Don't copy this */
+}
+.stylish-input-group .input-group-addon{
+    background: white !important;
+}
+.stylish-input-group .form-control{
+	border-right:0;
+	box-shadow:0 0 0;
+	border-color:#ccc;
+}
+.stylish-input-group button{
+    border:0;
+    background:transparent;
+}
+.col-centered{
+    float: none;
+    margin: 0 auto;
 }

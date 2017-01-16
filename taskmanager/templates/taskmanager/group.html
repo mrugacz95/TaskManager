@@ -1,16 +1,36 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
-    <a href="{% url 'taskmanager:login' %}">
-        <button type="submit" class="btn btn-danger save">Withdraw</button>
+    <a href="{% url 'taskmanager:main' %}">
+        <button type="submit" class="btn btn-danger toRight">Withdraw</button>
     </a>
-<h1>Group: {{ group.name }}</h1>
+    {% if isMember %}
+        <a href="{% url 'taskmanager:addtasktogroup' group.id %}">
+            <button type="submit" class="btn btn-default toRight">Add task to this group</button>
+        </a>
+    {% else %}
+        <a href="{% url 'taskmanager:addmetogroup' group.id %}">
+            <button type="submit" class="btn btn-default toRight">Add me to this group</button>
+        </a>
+    {% endif %}
+    <h1>Group: {{ group.name }}</h1>
 
+    {% if tasks|length == 0 %}
+        <p>No task in this group!</p>
+    {% else %}
+        <div class="list-group">
+            {% for task in tasks %}
+                <a href="{% url 'taskmanager:task' task.id %}"
+                   class="list-group-item list-group-item-action {% if task.done %}done{% endif %}">{{ task.title }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
     <h1>Users:</h1>
-    <ul>
+    <div class="list-group">
         {% for user in users %}
-            <li><a href={% url 'taskmanager:user' user.name %}>{{ user.name }}</a></li>
+            <a href="{% url 'taskmanager:user' user.name %}"
+               class="list-group-item list-group-item-action">{{ user.name }}</a>
         {% endfor %}
-    </ul>
+    </div>
     <div>
         <a onclick="goBack()">
             <button type="button" class="btn btn-primary">Back</button>

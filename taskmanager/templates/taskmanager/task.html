@@ -2,7 +2,11 @@
 {% block content %}
 
     <a href={% url 'taskmanager:deletetask' task.id %}>
-        <button type="button" class="btn btn-warning save">Delete</button>
+        <button type="button" class="btn btn-warning toRight">Delete</button>
+    </a>
+
+    <a href={% url 'taskmanager:done' task.id %}>
+        <button type="button" class="btn btn-success toRight">Done</button>
     </a>
 
     <h2> {{ task.title }}</h2>
@@ -10,10 +14,9 @@
         <li>description: <strong>{{ task.description }}</strong></li>
         <li>label: <strong>{{ task.label }}</strong></li>
         <li>deadline: <strong>{{ task.deadline }}</strong></li>
+        <li> {% if task.done %} <p class="bg-success"> status: Done</p> {% else %} <p class="bg-danger"> status: Waiting</p> {% endif %}</li>
     </ul>
     <div>
-        <a href={% url 'taskmanager:tasks' %}>
-            <button type="button" class="btn btn-primary">Back</button>
-        </a>
+            <button type="button" onclick="goBack()" class="btn btn-primary">Back</button>
     </div>
 {% endblock content %}
