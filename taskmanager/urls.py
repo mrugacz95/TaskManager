@@ -18,4 +18,6 @@ urlpatterns = [
     url(r'^deletetask/(?P<task_id>[0-9]+)/$', views.deleteTask, name='deletetask'),
     url(r'^register', views.register, name='register'),
     url(r'^group/(?P<group_id>[0-9]+)/$', views.group, name='group'),
+    url(r'^addgroup/$', views.addgroup, name='addgroup'),
+
 ]

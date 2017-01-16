@@ -42,3 +42,12 @@ class AddTaskForm(forms.Form):
         super(AddTaskForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit('submit', 'Submit'))
+
+class AddGroupForm(forms.Form):
+    name = forms.CharField(label='Group name', max_length=100)
+
+    def __init__(self, *args, **kwargs):
+        super(AddGroupForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.add_input(Submit('addgroup', 'Add group'))
+

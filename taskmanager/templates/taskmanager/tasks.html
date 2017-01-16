@@ -1,11 +1,14 @@
 {% extends 'taskmanager/base.html' %}
 
 {% block content %}
-    <h1>Tasks:</h1>
-    <a href={% url 'taskmanager:addtask' %}>
-        <button type="button" class="btn btn-default save">Add</button>
-    </a>
-
+    <div class="row form-group">
+    <div  class="col-1">
+        <h1>Tasks:</h1>
+    </div>
+        <a href="{% url 'taskmanager:addtask' %}" class="col-12">
+            <button type="button" class="btn btn-default save">Add</button>
+        </a>
+    </div>
     {% if error %}
         <div class="alert alert-warning">Something went wrong</div>
     {% endif %}
@@ -14,18 +17,27 @@
     {% else %}
         <div class="list-group">
             {% for task in tasks %}
-                <a href="{% url 'taskmanager:task' task.id %}" class="list-group-item list-group-item-action">{{ task.title }}</a>
+                <a href="{% url 'taskmanager:task' task.id %}"
+                   class="list-group-item list-group-item-action">{{ task.title }}</a>
             {% endfor %}
         </div>
     {% endif %}
 
-    <h1>Groups:</h1>
+    <div class="row form-group">
+    <div  class="col-1">
+        <h1>Groups:</h1>
+    </div>
+        <a href="{% url 'taskmanager:addgroup' %}" class="col-12">
+            <button type="button" class="btn btn-default save">Add</button>
+        </a>
+    </div>
     {% if groups|length == 0 %}
         <p>You dont belong to any group</p>
     {% else %}
         <div class="list-group">
             {% for group in groups %}
-                <a href="{% url 'taskmanager:group' group.id %}" class="list-group-item list-group-item-action">{{ group.name }}</a>
+                <a href="{% url 'taskmanager:group' group.id %}"
+                   class="list-group-item list-group-item-action">{{ group.name }}</a>
             {% endfor %}
         </div>
     {% endif %}

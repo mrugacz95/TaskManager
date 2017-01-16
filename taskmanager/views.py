@@ -1,18 +1,13 @@
-import datetime
-
-from django.conf import settings
-from django.db import DatabaseError
 from django.db import IntegrityError
-from django.db.models import Q
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
-from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword
-from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm
-from taskmanager.models import User, Task, Token, UserTask, GroupNames
+from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword, set_cookie
+from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm, AddGroupForm
+from taskmanager.models import User, Task, Token, UserTask, GroupNames, UserGroup
 
 
 def users(request):
@@ -41,14 +36,11 @@ def task(request, task_id):
 def tasks(request):
     user = getCurrentUser(request)
     try:
-        tasksList = Task.objects.filter(Q(usertask__user_name=user.name)).order_by('deadline')
-        #groupName = GroupNames.objects.filter(usergroup__user_name=user.name).first()
-        #print(groupName.name)
-        #tasksList = Task.objects.filter(grouptask__group__usergroup=groupName.name)
-        query = 'SELECT task.title, task.id,task.deadline,task.label,task.description FROM task LEFT JOIN group_task on task.id = group_task.task_id LEFT JOIN group_names on group_task.group_id = group_names.id LEFT JOIN user_group on group_names.id = user_group.group_names_id left join user_task on user_task.task_id = task.id WHERE user_group.user_name = "'+user.name+'" or user_task.user_name = "'+user.name+'"'
+        query = 'SELECT task.title, task.id,task.deadline,task.label,task.description FROM task LEFT JOIN group_task on task.id = group_task.task_id LEFT JOIN group_names on group_task.group_id = group_names.id LEFT JOIN user_group on group_names.id = user_group.group_names_id left join user_task on user_task.task_id = task.id WHERE user_group.user_name = "' + user.name + '" or user_task.user_name = "' + user.name + '"'
         tasksList = list(Task.objects.raw(raw_query=query))
         groupList = GroupNames.objects.filter(usergroup__user_name=user.name)
-        return render(request, 'taskmanager/tasks.html', {'tasks': tasksList, 'user': user, 'groups':groupList, 'error': False})
+        return render(request, 'taskmanager/tasks.html',
+                      {'tasks': tasksList, 'user': user, 'groups': groupList, 'error': False})
     except Task.DoesNotExist:
         return render(request, 'taskmanager/tasks.html', {'error': True})
 
@@ -89,17 +81,6 @@ def login(request):
     return response
 
 
-def set_cookie(response, key, value, days_expire=7):
-    if days_expire is None:
-        max_age = 7 * 24 * 60 * 60  # week
-    else:
-        max_age = days_expire * 24 * 60 * 60
-    expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
-                                         "%a, %d-%b-%Y %H:%M:%S GMT")
-    response.set_cookie(key, value, max_age=max_age, expires=expires, domain=settings.SESSION_COOKIE_DOMAIN,
-                        secure=settings.SESSION_COOKIE_SECURE or None)
-
-
 def logout(request):
     res = HttpResponseRedirect(reverse('taskmanager:login'))
     res.delete_cookie(TOKEN)
@@ -121,7 +102,7 @@ def addTask(request):
             user = getCurrentUser(request)
             UserTask.objects.create(user_name=user, task_id=newTask.pk)
             message = 'Success'
-        error= form.errors
+        error = form.errors
     return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm(), 'error': error, 'message': message})
 
 
@@ -145,7 +126,8 @@ def register(request):
             email = form.cleaned_data['email']
             if password == repass:
                 token = createToken()
-                newUser = User(name=userName, password=hashPassword(password), email=email, role_role_name_id='user', token_token_id=token.pk)
+                newUser = User(name=userName, password=hashPassword(password), email=email, role_role_name_id='user',
+                               token_token_id=token.pk)
                 try:
                     newUser.save(force_insert=True)
                 except IntegrityError:
@@ -156,7 +138,24 @@ def register(request):
             problem = form.errors
     return render(request, 'taskmanager/register.html', {'registerForm': RegisterForm(), 'problem': problem})
 
+
 @authentication
 def group(request, group_id):
-    GroupNames.objects.filter(id=group_id)
-    return render(request, 'taskmanager/group.html', {'group':group})
+    groupObj = GroupNames.objects.get(id=group_id)
+    return render(request, 'taskmanager/group.html', {'group': groupObj})
+
+
+@authentication
+def addgroup(request):
+    user = getCurrentUser(request)
+    problem = None
+    if request.method == 'POST':
+        form = AddGroupForm(request.POST)
+        if form.is_valid():
+            groupName = form.cleaned_data['name']
+            group = GroupNames(name=groupName)
+            group.save()
+            UserGroup.objects.create(group_names_id=group.pk, user_name=user)
+        else:
+            problem = form.errors
+    return render(request, 'taskmanager/addgroup.html', {'form': AddGroupForm()})

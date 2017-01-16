@@ -12,7 +12,7 @@ from django.db import models
 
 class GroupNames(models.Model):
     name = models.CharField(max_length=32, blank=True, null=True)
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False
