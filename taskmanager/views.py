@@ -8,13 +8,19 @@ from django.utils import timezone
 
 from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword, set_cookie
 from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm, AddGroupForm
-from taskmanager.models import User, Task, Token, UserTask, GroupNames, UserGroup, GroupTask
+from taskmanager.models import User, Task, Token, UserTask, GroupNames, UserGroup, GroupTask, Role
 
 
+@authentication
 def users(request):
-    users = User.objects.all()
-    return render(request, 'taskmanager/users.html', {'users': users})
-
+    user = getCurrentUser(request)
+    role = Role.objects.get(user__name=user.name)
+    roleName = role.role_name
+    if roleName == 'admin':
+        users = User.objects.all()
+        return render(request, 'taskmanager/users.html', {'users': users})
+    else:
+        return HttpResponse(404)
 
 @authentication
 def task(request, task_id):
@@ -208,14 +214,16 @@ def done(request, task_id):
     taskObj.save()
     return HttpResponseRedirect(reverse('taskmanager:main'))
 
-
+@authentication
 def search(request):
     users = None
     groups = None
     tasks = None
+    query = None
     if request.method == 'GET':
         query = request.GET['query']
-        users = User.objects.filter(name__search=query)
-        tasks = Task.objects.filter(title__search=query)
-        groups = GroupNames.objects.filter(name__search=query)
-    return render(request, 'taskmanager/search.html', {'tasks':tasks,'users': users, groups:'groups'})
+        query = '\S*' + query + '\S*'
+        users = User.objects.filter(name__regex=query)
+        tasks = Task.objects.filter(title__regex=query)
+        groups = GroupNames.objects.filter(name__regex=query)
+    return render(request, 'taskmanager/search.html', {'tasks': tasks, 'users': users, groups: 'groups', 'query':query})

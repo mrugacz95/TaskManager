@@ -1,0 +1,40 @@
+{% extends 'taskmanager/base.html' %}
+{% block content %}
+    <h1>Search results:</h1>
+    {% if tasks|length == 0 and groups|length == 0 and users|length == 0 %}
+        No results for query <strong>{{ query }} </strong>
+    {% endif %}
+    {% if tasks|length > 0 %}
+        <h3>Tasks:</h3>
+        <div class="list-group">
+            {% for task in tasks %}
+                <a href="{% url 'taskmanager:task' task.id %}"
+                   class="list-group-item list-group-item-action {% if task.done %}done{% endif %}">{{ task.title }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if groups|length > 0 %}
+        <h3> Groups:</h3>
+        <div class="list-group">
+            {% for group in groups %}
+                <a href="{% url 'taskmanager:group' group.id %}"
+                   class="list-group-item list-group-item-action">{{ group.name }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if users|length > 0 %}
+        <h3> Users:</h3>
+        <div class="list-group">
+            {% for user in users %}
+                <a href="{% url 'taskmanager:user' user.name %}"
+                   class="list-group-item list-group-item-action">{{ user.name }}</a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div>
+        <a href="{% url 'taskmanager:main' %}">
+            <button type="button" class="btn btn-primary">Back</button>
+        </a>
+    </div>
+{% endblock %}

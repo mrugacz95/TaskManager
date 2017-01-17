@@ -1,9 +1,9 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
     <h1>Users:</h1>
-    <ul>
+    <div class="list-group">
         {% for user in users %}
-            <li><a href={% url 'taskmanager:user' user.name %}>{{ user.name }}</a></li>
+           <a href="{% url 'taskmanager:user' user.name %}"  class="list-group-item list-group-item-action">{{ user.name }}</a>
         {% endfor %}
-    </ul>
+    </div >
 {% endblock content %}
