@@ -1,6 +1,6 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
-    <a href="{% url 'taskmanager:main' %}">
+    <a href="{% url 'taskmanager:withdraw' group.id %}">
         <button type="submit" class="btn btn-danger toRight">Withdraw</button>
     </a>
     {% if isMember %}

@@ -1,5 +1,6 @@
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 from django.db import InternalError
+from django.db.models import Q
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -21,6 +22,7 @@ def users(request):
         return render(request, 'taskmanager/users.html', {'users': users})
     else:
         return HttpResponse(404)
+
 
 @authentication
 def task(request, task_id):
@@ -178,7 +180,7 @@ def addMeToGroup(request, group_id):
     user = getCurrentUser(request)
     newUserGroup = UserGroup(user_name_id=user.name, group_names_id=group_id)
     newUserGroup.save()
-    return HttpResponseRedirect(reverse('taskmanager:group', kwargs={'group_id', group_id}))
+    return HttpResponseRedirect(reverse('taskmanager:group', kwargs={'group_id': group_id}))
 
 
 @authentication
@@ -214,6 +216,7 @@ def done(request, task_id):
     taskObj.save()
     return HttpResponseRedirect(reverse('taskmanager:main'))
 
+
 @authentication
 def search(request):
     users = None
@@ -222,8 +225,17 @@ def search(request):
     query = None
     if request.method == 'GET':
         query = request.GET['query']
-        query = '\S*' + query + '\S*'
-        users = User.objects.filter(name__regex=query)
-        tasks = Task.objects.filter(title__regex=query)
-        groups = GroupNames.objects.filter(name__regex=query)
-    return render(request, 'taskmanager/search.html', {'tasks': tasks, 'users': users, groups: 'groups', 'query':query})
+        searchQuery = '\S*' + query + '\S*'
+        users = User.objects.filter(name__regex=searchQuery)
+        tasks = Task.objects.filter(Q(title__regex=searchQuery) | Q(label__regex=searchQuery))
+        groups = GroupNames.objects.filter(name__regex=searchQuery)
+    return render(request, 'taskmanager/search.html',
+                  {'tasks': tasks, 'users': users, 'groups': groups, 'query': query})
+
+
+@authentication
+def withdrawFromGroup(request, group_id):
+    user = getCurrentUser(request)
+    cursor = connection.cursor()
+    cursor.execute('DELETE FROM user_group where user_name = "%s" and group_names_id = "%s"' % (user.name, group_id))
+    return HttpResponseRedirect(reverse('taskmanager:main'))
