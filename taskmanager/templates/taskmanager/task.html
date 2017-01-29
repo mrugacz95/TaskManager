@@ -16,7 +16,7 @@
         <li>deadline: <strong>{{ task.deadline }}</strong></li>
         <li> {% if task.done %} <p class="bg-success"> status: Done</p> {% else %} <p class="bg-danger"> status: Waiting</p> {% endif %}</li>
     </ul>
-    <div
+    <div>
             <button type="button" href="{% url 'taskmanager:main' %}" class="btn btn-primary">Back</button>
     </div>
 {% endblock content %}

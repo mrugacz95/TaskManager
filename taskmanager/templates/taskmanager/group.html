@@ -20,7 +20,7 @@
         <div class="list-group">
             {% for task in tasks %}
                 <a href="{% url 'taskmanager:task' task.id %}"
-                   class="list-group-item list-group-item-action {% if task.done %}done{% endif %}">{{ task.title }}</a>
+                   class="list-group-item list-group-item-action {% if task.done %}done{% endif %}">{{ task.title }}<div class="toRight">deadline: {{ task.deadline }}</div></a>
             {% endfor %}
         </div>
     {% endif %}

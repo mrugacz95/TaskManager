@@ -13,5 +13,7 @@
     </div>
     {%  endif %}
     {% crispy form %}
-            <button type="button" onclick="goBack()" class="btn btn-default">Back</button>
+    <a href="{% url 'taskmanager:main' %}">
+    <button type="button" class="btn btn-default">Back</button>
+    </a>
 {% endblock content %}
