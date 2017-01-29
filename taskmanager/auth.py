@@ -25,6 +25,23 @@ def authentication(func):
 
     return wrapper
 
+def adminAuthentication(func):
+    def wrapper(*args, **kw):
+        request = args[0]
+        token = request.COOKIES.get(TOKEN)
+        try:
+            Token.objects.get(access_token=token)
+            user = getCurrentUser(request)
+            if user.role_role_name.role_name == 'admin':
+                return func(*args, **kw)
+            else:
+                return HttpResponseRedirect(reverse('taskmanager:main'))
+        except Token.DoesNotExist:
+            print('Token nie istnieje')
+            return HttpResponseRedirect(reverse('taskmanager:login'))
+
+    return wrapper
+
 
 def createToken():
     randomToken = binascii.hexlify(os.urandom(32))

@@ -1,9 +1,36 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
+    <a href="{% url 'taskmanager:deletetokens' %}"  class="btn-group toRight">
+        <button type="button" class="btn btn-warning ">Delete Tokens</button>
+    </a>
     <h1>Users:</h1>
     <div class="list-group">
         {% for user in users %}
-           <a href="{% url 'taskmanager:user' user.name %}"  class="list-group-item list-group-item-action">{{ user.name }}</a>
+           <a href="{% url 'taskmanager:user' user.name %}"
+              class="list-group-item list-group-item-action
+                {% if user.role_role_name.role_name == 'admin' %}
+                    green
+                {%  endif %}
+
+                ">
+
+                    {{ user.name }}
+                       {% if user.role_role_name.role_name == 'admin' %}
+                            (admin)
+                        {%  endif %}
+            </a>
+                <div style="margin: 10px">
+                    {% if user.role_role_name.role_name != 'admin' %}
+                    <a href="{% url 'taskmanager:makeadmin' user.name %}"  class="btn-group">
+                        <button type="button" class="btn btn-success toRight">Make admin</button>
+                    </a>
+                    {% endif %}
+
+                    <a href="{% url 'taskmanager:deleteuser' user.name %}"  class="btn-group">
+                        <button type="button" class="btn btn-danger toRight">Delete user</button>
+                    </a>
+                </div>
         {% endfor %}
+
     </div >
 {% endblock content %}

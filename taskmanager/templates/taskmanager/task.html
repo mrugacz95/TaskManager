@@ -1,13 +1,18 @@
 {% extends 'taskmanager/base.html' %}
 {% block content %}
-
+{% if isowner %}
     <a href={% url 'taskmanager:deletetask' task.id %}>
-        <button type="button" class="btn btn-warning toRight">Delete</button>
+        <button type="button" class="btn btn-danger toRight">Delete</button>
     </a>
 
     <a href={% url 'taskmanager:done' task.id %}>
         <button type="button" class="btn btn-success toRight">Done</button>
     </a>
+
+    <a href={% url 'taskmanager:edittask' task.id %}>
+        <button type="button" class="btn btn-warning toRight">Edit</button>
+    </a>
+{% endif %}
 
     <h2> {{ task.title }}</h2>
     <ul>
@@ -17,6 +22,8 @@
         <li> {% if task.done %} <p class="bg-success"> status: Done</p> {% else %} <p class="bg-danger"> status: Waiting</p> {% endif %}</li>
     </ul>
     <div>
-            <button type="button" href="{% url 'taskmanager:main' %}" class="btn btn-primary">Back</button>
+            <a  href="{% url 'taskmanager:main' %}" >
+                <button type="button" class="btn btn-primary">Back</button>
+            </a>
     </div>
 {% endblock content %}

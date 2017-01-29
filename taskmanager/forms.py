@@ -11,8 +11,8 @@ from taskmanager import views
 
 
 class LoginForm(forms.Form):
-    login = forms.CharField(label='login', max_length=100)
-    password = forms.CharField(label='password', max_length=100, widget=PasswordInput())
+    login = forms.CharField(label='Login', max_length=32)
+    password = forms.CharField(label='Password', max_length=100, widget=PasswordInput())
 
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
@@ -21,7 +21,7 @@ class LoginForm(forms.Form):
 
 
 class RegisterForm(forms.Form):
-    login = forms.CharField(label='Login', max_length=100)
+    login = forms.CharField(label='Login', max_length=32)
     email = forms.EmailField(required=True)
     password = forms.CharField(label='Password', max_length=100, widget=PasswordInput())
     repeatPassword = forms.CharField(label='Repeat password', max_length=100, widget=PasswordInput(), required=True)
@@ -32,19 +32,19 @@ class RegisterForm(forms.Form):
         self.helper.add_input(Submit('register', 'Register'))
 
 
-class AddTaskForm(forms.Form):
-    title = forms.CharField(label='Title', max_length=100)
-    description = forms.CharField(label='Description', max_length=200)
+class TaskForm(forms.Form):
+    title = forms.CharField(label='Title', max_length=32)
+    description = forms.CharField(label='Description', max_length=160)
     deadline = forms.DateField(label='Deadline', initial=datetime.date.today)
-    label = forms.CharField(label='Label', max_length=100)
+    label = forms.CharField(label='Label', max_length=32)
 
     def __init__(self, *args, **kwargs):
-        super(AddTaskForm, self).__init__(*args, **kwargs)
+        super(TaskForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit('submit', 'Submit'))
 
 class AddGroupForm(forms.Form):
-    name = forms.CharField(label='Group name', max_length=100)
+    name = forms.CharField(label='Group name', max_length=32)
 
     def __init__(self, *args, **kwargs):
         super(AddGroupForm, self).__init__(*args, **kwargs)

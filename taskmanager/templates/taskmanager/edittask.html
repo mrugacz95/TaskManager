@@ -1,0 +1,19 @@
+{% extends 'taskmanager/base.html' %}
+
+{% load crispy_forms_tags %}
+{% crispy addtask_form addtask_form.helper %}
+{% block content %}
+    {%  if error %}
+    <div class="alert alert-danger">
+      <strong> {{ error }}</strong>
+    </div>
+    {%  elif message %}
+    <div class="alert alert-success">
+      <strong>Success!</strong> {{ message }}
+    </div>
+    {%  endif %}
+    {% crispy form %}
+    <a href="{% url 'taskmanager:main' %}">
+    <button type="button" class="btn btn-default">Back</button>
+    </a>
+{% endblock content %}

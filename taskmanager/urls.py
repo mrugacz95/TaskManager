@@ -22,7 +22,11 @@ urlpatterns = [
     url(r'^addTaskToGroup/(?P<group_id>[0-9]+)/$', views.addTaskToGroup, name='addtasktogroup'),
     url(r'^done/(?P<task_id>[0-9]+)/$', views.done, name='done'),
     url(r'^search/$', views.search, name='search'),
-    url(r'^withdraw/(?P<group_id>[0-9]+)/$', views.withdrawFromGroup, name='withdraw')
+    url(r'^withdraw/(?P<group_id>[0-9]+)/$', views.withdrawFromGroup, name='withdraw'),
+    url(r'^edittask/(?P<task_id>[0-9]+)/$', views.editTask, name='edittask'),
+    url(r'^makeadmin/(?P<user_name>[a-zA-Z0-9]+)/$', views.makeAdmin, name='makeadmin'),
+    url(r'^deleteuser/(?P<user_name>[a-zA-Z0-9]+)/$', views.deleteUser, name='deleteuser'),
+    url(r'^deleteTokens/$', views.deleteTokens, name='deletetokens')
 
 
 

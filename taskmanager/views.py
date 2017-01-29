@@ -7,12 +7,13 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
-from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword, set_cookie
-from taskmanager.forms import LoginForm, AddTaskForm, RegisterForm, AddGroupForm
+from taskmanager.auth import TOKEN, createToken, getCurrentUser, authentication, hashPassword, set_cookie, \
+    adminAuthentication
+from taskmanager.forms import LoginForm, TaskForm, RegisterForm, AddGroupForm
 from taskmanager.models import User, Task, Token, UserTask, GroupNames, UserGroup, GroupTask, Role
 
 
-@authentication
+@adminAuthentication
 def users(request):
     user = getCurrentUser(request)
     role = Role.objects.get(user__name=user.name)
@@ -29,7 +30,13 @@ def task(request, task_id):
     user = getCurrentUser(request)
     try:
         task = get_object_or_404(Task.objects.filter(id=task_id))
-        return render(request, 'taskmanager/task.html', {'task': task})
+        isOwnerByTask = Task.objects.filter(Q(id=task_id, usertask__user_name__name=user.name)).count() > 0
+        try:
+            group = GroupNames.objects.get(grouptask__task_id__id=task_id)
+            isOwnerByGroup = User.objects.filter(name=user.name, usergroup__group_names_id=group.id).count() > 0
+        except GroupNames.DoesNotExist:
+            isOwnerByGroup = False
+        return render(request, 'taskmanager/task.html', {'task': task, 'isowner': isOwnerByTask or isOwnerByGroup})
     except Task.DoesNotExist:
         return HttpResponse(status=404)
 
@@ -94,7 +101,7 @@ def logout(request):
 def addTask(request):
     message = error = None
     if request.method == 'POST':
-        form = AddTaskForm(request.POST)
+        form = TaskForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             description = form.cleaned_data['description']
@@ -106,7 +113,7 @@ def addTask(request):
             UserTask.objects.create(user_name=user, task_id=newTask.pk)
             message = 'Success'
         error = form.errors
-    return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm(), 'error': error, 'message': message})
+    return render(request, 'taskmanager/addtask.html', {'form': TaskForm(), 'error': error, 'message': message})
 
 
 @authentication
@@ -187,7 +194,7 @@ def addMeToGroup(request, group_id):
 def addTaskToGroup(request, group_id):
     message = error = None
     if request.method == 'POST':
-        form = AddTaskForm(request.POST)
+        form = TaskForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             description = form.cleaned_data['description']
@@ -200,7 +207,7 @@ def addTaskToGroup(request, group_id):
             message = 'Success'
             return HttpResponseRedirect(reverse('taskmanager:group', kwargs={'group_id': group_id}))
         error = form.errors
-    return render(request, 'taskmanager/addtask.html', {'form': AddTaskForm(), 'error': error, 'message': message})
+    return render(request, 'taskmanager/addtask.html', {'form': TaskForm(), 'error': error, 'message': message})
 
 
 @authentication
@@ -239,3 +246,50 @@ def withdrawFromGroup(request, group_id):
     cursor = connection.cursor()
     cursor.execute('DELETE FROM user_group where user_name = "%s" and group_names_id = "%s"' % (user.name, group_id))
     return HttpResponseRedirect(reverse('taskmanager:main'))
+
+
+@authentication
+def editTask(request, task_id):
+    message = None
+    error = None
+    task = Task.objects.get(id=task_id)
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            description = form.cleaned_data['description']
+            deadline = form.cleaned_data['deadline']
+            label = form.cleaned_data['label']
+            task.label = label
+            task.deadline = deadline
+            task.title = title
+            task.description = description
+            task.save()
+            return HttpResponseRedirect(reverse('taskmanager:main'))
+        else:
+            error = "Form is not valid"
+    data = {'title': task.title, 'description': task.description, 'deadline': task.deadline, 'label': task.label}
+    form = TaskForm(initial=data)
+    return render(request, 'taskmanager/edittask.html', {'form': form, 'error': error, 'message': message})
+
+
+@adminAuthentication
+def makeAdmin(request, user_name):
+    user = User.objects.get(name=user_name)
+    role = Role.objects.get(role_name='admin')
+    user.role_role_name = role
+    user.save()
+    return HttpResponseRedirect(reverse('taskmanager:users'))
+
+
+@adminAuthentication
+def deleteUser(request, user_name):
+    user = User.objects.get(name=user_name)
+    user.delete()
+    return HttpResponseRedirect(reverse('taskmanager:users'))
+
+
+def deleteTokens(request):
+    cursor = connection.cursor()
+    cursor.execute("CALL deleteOldTokens();")
+    return HttpResponseRedirect(reverse('taskmanager:users'))

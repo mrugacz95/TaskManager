@@ -50,6 +50,9 @@ body {
     text-decoration: line-through;
     background-color: greenyellow;
 }
+.green {
+    background-color: greenyellow;
+}
 #imaginary_container{
     margin-top:20%; /* Don't copy this */
 }

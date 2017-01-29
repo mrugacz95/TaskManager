@@ -5,6 +5,13 @@
     <a href={% url 'taskmanager:logout' %}>
         <button type="button" class="btn btn-primary toRight">Logout ({{ user.name }})</button>
     </a>
+    {% if user.role_role_name.role_name == 'admin' %}
+        <a href="{% url 'taskmanager:users' %}">
+        <button type="button" class="btn btn-default toRight">
+          <span class="glyphicon glyphicon-cog"></span> Admin Panel
+        </button>
+        </a>
+    {% endif %}
     <h1>{{ user.name }}</h1>
     <p>Email: {{ user.email }}</p>
     <div class="row form-group">
