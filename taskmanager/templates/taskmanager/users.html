@@ -3,6 +3,12 @@
     <a href="{% url 'taskmanager:deletetokens' %}"  class="btn-group toRight">
         <button type="button" class="btn btn-warning ">Delete Tokens</button>
     </a>
+
+    <div>
+            <a  href="{% url 'taskmanager:main' %}" >
+                <button type="button" class="btn btn-primary">Back</button>
+            </a>
+    </div>
     <h1>Users:</h1>
     <div class="list-group">
         {% for user in users %}
